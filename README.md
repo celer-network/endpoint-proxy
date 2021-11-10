@@ -6,7 +6,7 @@ This proxy can be used for fill this missed data for such chains.
 Now, only specified chain is involved.
 You can start a single proxy server or just start a proxy proess in your code which means there is no need to deploy another single proxy server.
 
-###1. start a  proxy server.
+##1. start a  proxy server.
 -p {port}
 -endpoint {remote endpoint}
 -cid {chain id}
@@ -23,7 +23,7 @@ go build
 ./main -p 10090 -cid 44787 -endpoint https://api.s0.b.hmny.io
 ```
 
-###2. start a proxy process in your program.
+##2. start a proxy process in your program.
 ```
 import "github.com/celer-network/endpoint-proxy/endpointproxy"
 
