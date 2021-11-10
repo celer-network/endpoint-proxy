@@ -39,7 +39,8 @@ func startCeloProxy(targetHost string, port int) error {
 	p.ModifyResponse = modifyCeloResponse()
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", proxyRequestHandler(p))
-	return startCustomProxyByPort(port, mux)
+	go startCustomProxyByPort(port, mux)
+	return nil
 }
 
 func modifyCeloRequest(req *http.Request) {

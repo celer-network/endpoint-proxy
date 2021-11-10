@@ -46,13 +46,7 @@ func modifyHarmonyRequest(req *http.Request) {
 		log.Errorf("fail to unmarshal this harmony req body err:%s", err.Error())
 		return
 	}
-	var params []interface{}
 	if msg.Method == MethodEthGetCode {
-		err = json.Unmarshal(msg.Params, params)
-		if err != nil {
-			log.Errorf("fail to unmarshal this harmony req body params err:%s", err.Error())
-			return
-		}
 		newParams := strings.Replace(string(msg.Params), "\"pending\"", "\"latest\"", 1)
 		msg.Params = []byte(newParams)
 	}
