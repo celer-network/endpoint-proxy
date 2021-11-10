@@ -27,5 +27,5 @@ go build
 ```
 import "github.com/celer-network/endpoint-proxy/endpointproxy"
 
-go endpointproxy.StartProxy("https://api.s0.b.hmny.io", 1666700000, 10090)
+endpointproxy.StartProxy("https://api.s0.b.hmny.io", 1666700000, 10090)
 ```

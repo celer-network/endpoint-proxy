@@ -31,7 +31,8 @@ func startHarmonyProxy(targetHost string, port int) error {
 	}
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", proxyRequestHandler(p))
-	return startCustomProxyByPort(port, mux)
+	go startCustomProxyByPort(port, mux)
+	return nil
 }
 
 func modifyHarmonyRequest(req *http.Request) {

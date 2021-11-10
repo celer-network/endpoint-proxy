@@ -48,12 +48,17 @@ func StartProxy(originEndpoint string, chainId uint64, port int) error {
 	}
 	if err != nil {
 		log.Errorf("fail to start this proxy, err:%s", err.Error())
+		return err
 	}
-	return err
+	return nil
 }
 
-func startCustomProxyByPort(port int, handler http.Handler) error {
-	return http.ListenAndServe(fmt.Sprintf(":%d", port), handler)
+func startCustomProxyByPort(port int, handler http.Handler) {
+	err := http.ListenAndServe(fmt.Sprintf(":%d", port), handler)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return
 }
 
 // ProxyRequestHandler handles the http request using proxy
