@@ -52,7 +52,7 @@ func modifyHarmonyRequest(req *http.Request) {
 	}
 	newMsg, marshalErr := json.Marshal(msg)
 	if marshalErr != nil {
-		log.Errorf("fail to marshal this new harmony req, raw:%s, err:%s", string(newMsg), err.Error())
+		log.Errorf("fail to marshal this new harmony req, raw:%s, err:%s", string(newMsg), marshalErr.Error())
 		return
 	}
 	req.Body = ioutil.NopCloser(bytes.NewReader(newMsg))
