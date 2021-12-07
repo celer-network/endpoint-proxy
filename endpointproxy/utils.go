@@ -3,10 +3,10 @@ package endpointproxy
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/celer-network/goutils/log"
 	"net/http"
 	"net/http/httputil"
-
-	"github.com/celer-network/goutils/log"
+	"time"
 )
 
 const (
@@ -50,6 +50,7 @@ func StartProxy(originEndpoint string, chainId uint64, port int) error {
 		log.Errorf("fail to start this proxy, err:%s", err.Error())
 		return err
 	}
+	smallDelay()
 	return nil
 }
 
@@ -66,4 +67,8 @@ func proxyRequestHandler(proxy *httputil.ReverseProxy) func(http.ResponseWriter,
 	return func(w http.ResponseWriter, r *http.Request) {
 		proxy.ServeHTTP(w, r)
 	}
+}
+
+func smallDelay() {
+	time.Sleep(100 * time.Millisecond)
 }
