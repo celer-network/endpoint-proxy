@@ -3,10 +3,11 @@ package endpointproxy
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/celer-network/goutils/log"
 	"net/http"
 	"net/http/httputil"
 	"time"
+
+	"github.com/celer-network/goutils/log"
 )
 
 const (
