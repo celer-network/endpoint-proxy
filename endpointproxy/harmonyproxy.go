@@ -36,6 +36,9 @@ func startHarmonyProxy(targetHost string, port int) error {
 }
 
 func modifyHarmonyRequest(req *http.Request) {
+	req.URL.Scheme = harmonyTargetUrl.Scheme
+	req.URL.Host = harmonyTargetUrl.Host
+	req.Host = harmonyTargetUrl.Host
 	reqStr, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		log.Errorf("invalid harmony request err:%s", err.Error())
