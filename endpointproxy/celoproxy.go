@@ -49,12 +49,12 @@ func modifyCeloRequest(req *http.Request) {
 	req.Host = celoTargetUrl.Host
 	reqStr, err := ioutil.ReadAll(req.Body)
 	if err != nil {
-		log.Warnf("invalid harmony request err:%s", err.Error())
+		log.Warnf("invalid celo request err:%s", err.Error())
 		return
 	}
 	var msg jsonrpcMessage
 	if err = json.Unmarshal(reqStr, &msg); err != nil {
-		log.Warnf("fail to unmarshal this harmony req body err:%s", err.Error())
+		log.Warnf("fail to unmarshal this celo req body err:%s", err.Error())
 		return
 	}
 	req.Header.Set(celoHeaderRpcMethod, msg.Method)
