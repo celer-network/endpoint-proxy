@@ -16,8 +16,12 @@ const (
 
 	harmonyChainId        = 1666600000
 	harmonyTestnetChainId = 1666700000
-	celoChainId           = 42220
-	celoTestnetChainId    = 44787
+
+	celoChainId        = 42220
+	celoTestnetChainId = 44787
+
+	moonRiverChainId        = 1285
+	moonRiverTestnetChainId = 1287
 )
 
 // this struct is copied from eth client, so we need to pay attention to the update of eth client
@@ -44,6 +48,8 @@ func StartProxy(originEndpoint string, chainId uint64, port int) error {
 		err = startHarmonyProxy(originEndpoint, port)
 	case celoChainId, celoTestnetChainId:
 		err = startCeloProxy(originEndpoint, port)
+	case moonRiverChainId, moonRiverTestnetChainId:
+		err = startMoonRiverProxy(originEndpoint, port)
 	default:
 		return fmt.Errorf("do not support proxy for this chain, origin endpoint:%s, chainId:%d", originEndpoint, chainId)
 	}
@@ -52,6 +58,7 @@ func StartProxy(originEndpoint string, chainId uint64, port int) error {
 		return err
 	}
 	smallDelay()
+	log.Infof("start proxy for chain:%d, endpoint:%s, port:%d", chainId, originEndpoint, port)
 	return nil
 }
 
