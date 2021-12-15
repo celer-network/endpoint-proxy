@@ -81,8 +81,7 @@ func modifyCeloResponse() func(*http.Response) error {
 				return err
 			}
 			if result.UncleHash == nil {
-				emptyHash := types.EmptyUncleHash
-				result.UncleHash = &emptyHash
+				result.UncleHash = &types.EmptyUncleHash
 			}
 			if result.Difficulty == nil {
 				result.Difficulty = &hexutil.Big{}
