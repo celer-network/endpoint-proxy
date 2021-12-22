@@ -12,22 +12,22 @@ import (
 	"github.com/celer-network/goutils/log"
 )
 
-var (
+type MoonRiverProxy struct {
 	moonRiverTargetUrl *url.URL
-)
+}
 
 // NewProxy takes target host and creates a reverse proxy
-func startMoonRiverProxy(targetHost string, port int) error {
+func (m *MoonRiverProxy) startMoonRiverProxy(targetHost string, port int) error {
 	var err error
-	moonRiverTargetUrl, err = url.Parse(targetHost)
+	m.moonRiverTargetUrl, err = url.Parse(targetHost)
 	if err != nil {
 		return err
 	}
-	p := httputil.NewSingleHostReverseProxy(moonRiverTargetUrl)
+	p := httputil.NewSingleHostReverseProxy(m.moonRiverTargetUrl)
 	originalDirector := p.Director
 	p.Director = func(req *http.Request) {
 		originalDirector(req)
-		modifyMoonRiverRequest(req)
+		m.modifyMoonRiverRequest(req)
 	}
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", proxyRequestHandler(p))
@@ -35,10 +35,10 @@ func startMoonRiverProxy(targetHost string, port int) error {
 	return nil
 }
 
-func modifyMoonRiverRequest(req *http.Request) {
-	req.URL.Scheme = moonRiverTargetUrl.Scheme
-	req.URL.Host = moonRiverTargetUrl.Host
-	req.Host = moonRiverTargetUrl.Host
+func (m *MoonRiverProxy) modifyMoonRiverRequest(req *http.Request) {
+	req.URL.Scheme = m.moonRiverTargetUrl.Scheme
+	req.URL.Host = m.moonRiverTargetUrl.Host
+	req.Host = m.moonRiverTargetUrl.Host
 	reqStr, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		log.Errorf("invalid moonriver request err:%s", err.Error())

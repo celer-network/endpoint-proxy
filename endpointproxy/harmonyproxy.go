@@ -12,22 +12,22 @@ import (
 	"github.com/celer-network/goutils/log"
 )
 
-var (
+type HarmonyProxy struct {
 	harmonyTargetUrl *url.URL
-)
+}
 
 // NewProxy takes target host and creates a reverse proxy
-func startHarmonyProxy(targetHost string, port int) error {
+func (h *HarmonyProxy) startHarmonyProxy(targetHost string, port int) error {
 	var err error
-	harmonyTargetUrl, err = url.Parse(targetHost)
+	h.harmonyTargetUrl, err = url.Parse(targetHost)
 	if err != nil {
 		return err
 	}
-	p := httputil.NewSingleHostReverseProxy(harmonyTargetUrl)
+	p := httputil.NewSingleHostReverseProxy(h.harmonyTargetUrl)
 	originalDirector := p.Director
 	p.Director = func(req *http.Request) {
 		originalDirector(req)
-		modifyHarmonyRequest(req)
+		h.modifyHarmonyRequest(req)
 	}
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", proxyRequestHandler(p))
@@ -35,10 +35,10 @@ func startHarmonyProxy(targetHost string, port int) error {
 	return nil
 }
 
-func modifyHarmonyRequest(req *http.Request) {
-	req.URL.Scheme = harmonyTargetUrl.Scheme
-	req.URL.Host = harmonyTargetUrl.Host
-	req.Host = harmonyTargetUrl.Host
+func (h *HarmonyProxy) modifyHarmonyRequest(req *http.Request) {
+	req.URL.Scheme = h.harmonyTargetUrl.Scheme
+	req.URL.Host = h.harmonyTargetUrl.Host
+	req.Host = h.harmonyTargetUrl.Host
 	reqStr, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		log.Errorf("invalid harmony request err:%s", err.Error())

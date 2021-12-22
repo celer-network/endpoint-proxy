@@ -19,22 +19,22 @@ const (
 	celoHeaderRpcMethod = "header-rpc-method"
 )
 
-var (
+type CeloProxy struct {
 	celoTargetUrl *url.URL
-)
+}
 
 // NewProxy takes target host and creates a reverse proxy
-func startCeloProxy(targetHost string, port int) error {
+func (c *CeloProxy) startCeloProxy(targetHost string, port int) error {
 	var err error
-	celoTargetUrl, err = url.Parse(targetHost)
+	c.celoTargetUrl, err = url.Parse(targetHost)
 	if err != nil {
 		return err
 	}
-	p := httputil.NewSingleHostReverseProxy(celoTargetUrl)
+	p := httputil.NewSingleHostReverseProxy(c.celoTargetUrl)
 	originalDirector := p.Director
 	p.Director = func(req *http.Request) {
 		originalDirector(req)
-		modifyCeloRequest(req)
+		c.modifyCeloRequest(req)
 	}
 	p.ModifyResponse = modifyCeloResponse()
 	mux := http.NewServeMux()
@@ -43,10 +43,10 @@ func startCeloProxy(targetHost string, port int) error {
 	return nil
 }
 
-func modifyCeloRequest(req *http.Request) {
-	req.URL.Scheme = celoTargetUrl.Scheme
-	req.URL.Host = celoTargetUrl.Host
-	req.Host = celoTargetUrl.Host
+func (c *CeloProxy) modifyCeloRequest(req *http.Request) {
+	req.URL.Scheme = c.celoTargetUrl.Scheme
+	req.URL.Host = c.celoTargetUrl.Host
+	req.Host = c.celoTargetUrl.Host
 	reqStr, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		log.Warnf("invalid celo request err:%s", err.Error())

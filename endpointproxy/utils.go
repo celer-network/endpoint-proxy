@@ -45,11 +45,14 @@ func StartProxy(originEndpoint string, chainId uint64, port int) error {
 	var err error
 	switch chainId {
 	case harmonyChainId, harmonyTestnetChainId:
-		err = startHarmonyProxy(originEndpoint, port)
+		h := new(HarmonyProxy)
+		err = h.startHarmonyProxy(originEndpoint, port)
 	case celoChainId, celoTestnetChainId:
-		err = startCeloProxy(originEndpoint, port)
+		c := new(CeloProxy)
+		err = c.startCeloProxy(originEndpoint, port)
 	case moonRiverChainId, moonRiverTestnetChainId:
-		err = startMoonRiverProxy(originEndpoint, port)
+		m := new(MoonRiverProxy)
+		err = m.startMoonRiverProxy(originEndpoint, port)
 	default:
 		return fmt.Errorf("do not support proxy for this chain, origin endpoint:%s, chainId:%d", originEndpoint, chainId)
 	}
