@@ -17,6 +17,8 @@ const (
 	harmonyChainId        = 1666600000
 	harmonyTestnetChainId = 1666700000
 
+	asterChainId = 592
+
 	celoChainId        = 42220
 	celoTestnetChainId = 44787
 
@@ -45,7 +47,7 @@ type jsonError struct {
 func StartProxy(originEndpoint string, chainId uint64, port int) error {
 	var err error
 	switch chainId {
-	case harmonyChainId, harmonyTestnetChainId:
+	case harmonyChainId, harmonyTestnetChainId, asterChainId:
 		h := new(HarmonyProxy)
 		err = h.startHarmonyProxy(originEndpoint, port)
 	case celoChainId, celoTestnetChainId:
