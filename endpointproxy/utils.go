@@ -15,6 +15,7 @@ const (
 	MethodEthGetBlockByNumber = "eth_getBlockByNumber"
 
 	astarChainId = 592
+	shidenChainId = 336
 
 	harmonyChainId        = 1666600000
 	harmonyTestnetChainId = 1666700000
@@ -47,7 +48,7 @@ type jsonError struct {
 func StartProxy(originEndpoint string, chainId uint64, port int) error {
 	var err error
 	switch chainId {
-	case astarChainId:
+	case astarChainId, shidenChainId:
 		h := new(AstarProxy)
 		err = h.startAstarProxy(originEndpoint, port)
 	case harmonyChainId, harmonyTestnetChainId:
