@@ -23,6 +23,8 @@ const (
 	celoChainId        = 42220
 	celoTestnetChainId = 44787
 
+	acalaChainId = 595
+
 	moonBeamChainId         = 1284
 	moonRiverChainId        = 1285
 	moonRiverTestnetChainId = 1287
@@ -54,7 +56,7 @@ func StartProxy(originEndpoint string, chainId uint64, port int) error {
 	case harmonyChainId, harmonyTestnetChainId:
 		h := new(HarmonyProxy)
 		err = h.startHarmonyProxy(originEndpoint, port)
-	case celoChainId, celoTestnetChainId:
+	case celoChainId, celoTestnetChainId, acalaChainId:
 		c := new(CeloProxy)
 		err = c.startCeloProxy(originEndpoint, port)
 	case moonBeamChainId, moonRiverChainId, moonRiverTestnetChainId:
