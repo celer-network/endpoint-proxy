@@ -14,7 +14,7 @@ const (
 	MethodEthGetCode          = "eth_getCode"
 	MethodEthGetBlockByNumber = "eth_getBlockByNumber"
 
-	astarChainId = 592
+	astarChainId  = 592
 	shidenChainId = 336
 
 	harmonyChainId        = 1666600000
@@ -23,7 +23,7 @@ const (
 	celoChainId        = 42220
 	celoTestnetChainId = 44787
 
-	acalaChainId = 595
+	acalaTestnetChainId = 595
 
 	moonBeamChainId         = 1284
 	moonRiverChainId        = 1285
@@ -53,10 +53,10 @@ func StartProxy(originEndpoint string, chainId uint64, port int) error {
 	case astarChainId, shidenChainId:
 		h := new(AstarProxy)
 		err = h.startAstarProxy(originEndpoint, port)
-	case harmonyChainId, harmonyTestnetChainId:
+	case harmonyChainId, harmonyTestnetChainId, acalaTestnetChainId:
 		h := new(HarmonyProxy)
 		err = h.startHarmonyProxy(originEndpoint, port)
-	case celoChainId, celoTestnetChainId, acalaChainId:
+	case celoChainId, celoTestnetChainId:
 		c := new(CeloProxy)
 		err = c.startCeloProxy(originEndpoint, port)
 	case moonBeamChainId, moonRiverChainId, moonRiverTestnetChainId:
