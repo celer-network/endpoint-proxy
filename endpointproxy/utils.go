@@ -54,7 +54,7 @@ func StartProxy(originEndpoint string, chainId uint64, port int) error {
 	case astarChainId, shidenChainId:
 		h := new(AstarProxy)
 		err = h.startAstarProxy(originEndpoint, port)
-	case acalaTestnetChainId:
+	case acalaTestnetChainId, acalaChainId:
 		h := new(AcalaProxy)
 		err = h.startAcalaProxy(originEndpoint, port)
 	case harmonyChainId, harmonyTestnetChainId:
