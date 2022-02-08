@@ -23,6 +23,7 @@ const (
 	celoChainId        = 42220
 	celoTestnetChainId = 44787
 
+	acalaChainId        = 787
 	acalaTestnetChainId = 595
 
 	moonBeamChainId         = 1284
