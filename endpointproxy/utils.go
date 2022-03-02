@@ -25,10 +25,6 @@ const (
 
 	acalaChainId        = 787
 	acalaTestnetChainId = 595
-
-	moonBeamChainId         = 1284
-	moonRiverChainId        = 1285
-	moonRiverTestnetChainId = 1287
 )
 
 // this struct is copied from eth client, so we need to pay attention to the update of eth client
@@ -63,9 +59,6 @@ func StartProxy(originEndpoint string, chainId uint64, port int) error {
 	case celoChainId, celoTestnetChainId:
 		c := new(CeloProxy)
 		err = c.startCeloProxy(originEndpoint, port)
-	case moonBeamChainId, moonRiverChainId, moonRiverTestnetChainId:
-		m := new(MoonRiverProxy)
-		err = m.startMoonRiverProxy(originEndpoint, port)
 	default:
 		return fmt.Errorf("do not support proxy for this chain, origin endpoint:%s, chainId:%d", originEndpoint, chainId)
 	}
