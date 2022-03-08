@@ -25,6 +25,9 @@ const (
 
 	acalaChainId        = 787
 	acalaTestnetChainId = 595
+
+	cloverChainId        = 1024
+	cloverTestnetChainId = 1023
 )
 
 // this struct is copied from eth client, so we need to pay attention to the update of eth client
@@ -53,6 +56,9 @@ func StartProxy(originEndpoint string, chainId uint64, port int) error {
 	case acalaTestnetChainId, acalaChainId:
 		h := new(AcalaProxy)
 		err = h.startAcalaProxy(originEndpoint, port)
+	case cloverChainId, cloverTestnetChainId:
+		h := new(CloverProxy)
+		err = h.startCloverProxy(originEndpoint, port)
 	case harmonyChainId, harmonyTestnetChainId:
 		h := new(HarmonyProxy)
 		err = h.startHarmonyProxy(originEndpoint, port)
