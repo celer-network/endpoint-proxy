@@ -13,6 +13,7 @@ import (
 const (
 	MethodEthGetCode          = "eth_getCode"
 	MethodEthGetBlockByNumber = "eth_getBlockByNumber"
+	MethodEthCall             = "eth_call"
 
 	astarChainId  = 592
 	shidenChainId = 336
