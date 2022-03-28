@@ -53,6 +53,10 @@ func (h *ConfluxProxy) modifyConfluxRequest(req *http.Request) {
 		newParams := strings.Replace(string(msg.Params), "\"pending\"", "\"latest\"", 1)
 		msg.Params = []byte(newParams)
 	}
+	if msg.Method == MethodEthCall {
+		newParams := strings.Replace(string(msg.Params), ",\"from\":\"0x0000000000000000000000000000000000000000\"", "", 1)
+		msg.Params = []byte(newParams)
+	}
 	newMsg, marshalErr := json.Marshal(msg)
 	if marshalErr != nil {
 		log.Errorf("fail to marshal this new conflux req, raw:%s, err:%s", string(newMsg), marshalErr.Error())
