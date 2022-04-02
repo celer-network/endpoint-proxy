@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"strconv"
 	"strings"
 
 	"github.com/celer-network/goutils/log"
@@ -68,6 +69,7 @@ func modifyOntologyResponse() func(*http.Response) error {
 			newData := strings.Replace(string(originData), "\"stateRoot\":\"0x\"", "\"stateRoot\":\"0x0000000000000000000000000000000000000000000000000000000000000000\"", 1)
 			resp.Body = ioutil.NopCloser(bytes.NewReader([]byte(newData)))
 			resp.ContentLength = int64(len([]byte(newData)))
+			resp.Header.Set("Content-Length", strconv.Itoa(len(newData)))
 		}
 		return nil
 	}
