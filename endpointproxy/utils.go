@@ -31,6 +31,8 @@ const (
 	cloverTestnetChainId = 1023
 
 	confluxChainId = 1030
+
+	ontologyChainId = 58
 )
 
 // this struct is copied from eth client, so we need to pay attention to the update of eth client
