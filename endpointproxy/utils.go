@@ -55,6 +55,9 @@ type jsonError struct {
 func StartProxy(originEndpoint string, chainId uint64, port int) error {
 	var err error
 	switch chainId {
+	case ontologyChainId:
+		h := new(OntologyProxy)
+		err = h.startOntologyProxy(originEndpoint, port)
 	case confluxChainId:
 		h := new(ConfluxProxy)
 		err = h.startConfluxProxy(originEndpoint, port)
