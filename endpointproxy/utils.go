@@ -31,6 +31,8 @@ const (
 	cloverTestnetChainId = 1023
 
 	confluxChainId = 1030
+
+	ontologyChainId = 58
 )
 
 // this struct is copied from eth client, so we need to pay attention to the update of eth client
@@ -53,6 +55,9 @@ type jsonError struct {
 func StartProxy(originEndpoint string, chainId uint64, port int) error {
 	var err error
 	switch chainId {
+	case ontologyChainId:
+		h := new(OntologyProxy)
+		err = h.startOntologyProxy(originEndpoint, port)
 	case confluxChainId:
 		h := new(ConfluxProxy)
 		err = h.startConfluxProxy(originEndpoint, port)
