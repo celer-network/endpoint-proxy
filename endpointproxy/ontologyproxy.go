@@ -2,7 +2,6 @@ package endpointproxy
 
 import (
 	"bytes"
-	"compress/gzip"
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
@@ -62,25 +61,13 @@ func (c *OntologyProxy) modifyOntologyRequest(req *http.Request) {
 func modifyOntologyResponse() func(*http.Response) error {
 	return func(resp *http.Response) error {
 		if resp.Request != nil && resp.Request.Header.Get(ontologyHeaderRpcMethod) == MethodEthGetBlockByNumber {
-			gzipReader, err := gzip.NewReader(resp.Body)
-			if err != nil {
-				return err
-			}
-			originData, err := ioutil.ReadAll(gzipReader)
+			originData, err := ioutil.ReadAll(resp.Body)
 			if err != nil {
 				return err
 			}
 			newData := strings.Replace(string(originData), "\"stateRoot\":\"0x\"", "\"stateRoot\":\"0x0000000000000000000000000000000000000000000000000000000000000000\"", 1)
-			var b bytes.Buffer
-			gz := gzip.NewWriter(&b)
-			if _, err = gz.Write([]byte(newData)); err != nil {
-				return err
-			}
-			if err = gz.Close(); err != nil {
-				return err
-			}
-			resp.Body = ioutil.NopCloser(bytes.NewReader(b.Bytes()))
-			resp.ContentLength = int64(len(b.Bytes()))
+			resp.Body = ioutil.NopCloser(bytes.NewReader([]byte(newData)))
+			resp.ContentLength = int64(len([]byte(newData)))
 		}
 		return nil
 	}
