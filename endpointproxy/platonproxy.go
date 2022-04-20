@@ -4,8 +4,6 @@ import (
 	"bytes"
 	"compress/gzip"
 	"encoding/json"
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/core/types"
 	"io/ioutil"
 	"net/http"
 	"net/http/httputil"
@@ -14,6 +12,8 @@ import (
 	"strings"
 
 	"github.com/celer-network/goutils/log"
+	"github.com/ethereum/go-ethereum/common/hexutil"
+	"github.com/ethereum/go-ethereum/core/types"
 )
 
 const (
@@ -65,7 +65,7 @@ func (c *PlatonProxy) modifyPlatonRequest(req *http.Request) {
 
 func modifyPlatonResponse() func(*http.Response) error {
 	return func(resp *http.Response) error {
-		if resp.Request != nil && resp.Request.Header.Get(ontologyHeaderRpcMethod) == MethodEthGetBlockByNumber {
+		if resp.Request != nil && resp.Request.Header.Get(platonHeaderRpcMethod) == MethodEthGetBlockByNumber {
 			gzipReader, err := gzip.NewReader(resp.Body)
 			if err != nil {
 				return err
