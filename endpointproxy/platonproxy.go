@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"strings"
 
 	"github.com/celer-network/goutils/log"
 	"github.com/ethereum/go-ethereum/common/hexutil"
@@ -46,6 +47,7 @@ func (c *PlatonProxy) modifyPlatonRequest(req *http.Request) {
 	req.URL.Scheme = c.platonTargetUrl.Scheme
 	req.URL.Host = c.platonTargetUrl.Host
 	req.Host = c.platonTargetUrl.Host
+	req.URL.Path = strings.TrimRight(req.URL.Path, "/")
 	reqStr, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		log.Warnf("invalid platon request err:%s", err.Error())
@@ -56,7 +58,7 @@ func (c *PlatonProxy) modifyPlatonRequest(req *http.Request) {
 		log.Warnf("fail to unmarshal this platon req body err:%s", err.Error())
 		return
 	}
-	//req.Header.Set(platonHeaderRpcMethod, msg.Method)
+	req.Header.Set(platonHeaderRpcMethod, msg.Method)
 	req.Body = ioutil.NopCloser(bytes.NewReader(reqStr))
 }
 
