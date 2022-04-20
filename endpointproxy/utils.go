@@ -59,7 +59,7 @@ type jsonError struct {
 func StartProxy(originEndpoint string, chainId uint64, port int) error {
 	var err error
 	switch chainId {
-	case crabChainId, platonChainId:
+	case crabChainId:
 		h := new(CrabProxy)
 		err = h.startCrabProxy(originEndpoint, port)
 	case ontologyChainId:
@@ -80,7 +80,7 @@ func StartProxy(originEndpoint string, chainId uint64, port int) error {
 	case harmonyChainId, harmonyTestnetChainId:
 		h := new(HarmonyProxy)
 		err = h.startHarmonyProxy(originEndpoint, port)
-	case celoChainId, celoTestnetChainId:
+	case celoChainId, celoTestnetChainId, platonChainId:
 		c := new(CeloProxy)
 		err = c.startCeloProxy(originEndpoint, port)
 	default:
