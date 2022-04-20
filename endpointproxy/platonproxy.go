@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"strconv"
 	"strings"
 
 	"github.com/celer-network/goutils/log"
@@ -101,6 +102,7 @@ func modifyPlatonResponse() func(*http.Response) error {
 			}
 			resp.Body = ioutil.NopCloser(bytes.NewReader(b.Bytes()))
 			resp.ContentLength = int64(len(b.Bytes()))
+			resp.Header.Set("Content-Length", strconv.Itoa(len(b.Bytes())))
 		}
 		return nil
 	}
