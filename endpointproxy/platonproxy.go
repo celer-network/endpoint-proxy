@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"compress/gzip"
 	"encoding/json"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/core/types"
 	"io/ioutil"
 	"net/http"
@@ -83,6 +84,12 @@ func modifyPlatonResponse() func(*http.Response) error {
 			}
 			if result.UncleHash == nil {
 				result.UncleHash = &types.EmptyUncleHash
+			}
+			if result.Difficulty == nil {
+				result.Difficulty = &hexutil.Big{}
+			}
+			if result.GasLimit == nil {
+				result.GasLimit = new(hexutil.Uint64)
 			}
 			msg.Result, err = json.Marshal(result)
 			if err != nil {
