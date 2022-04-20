@@ -2,7 +2,6 @@ package endpointproxy
 
 import (
 	"bytes"
-	"compress/gzip"
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
@@ -12,8 +11,6 @@ import (
 	"strings"
 
 	"github.com/celer-network/goutils/log"
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/core/types"
 )
 
 const (
@@ -65,52 +62,14 @@ func (c *PlatonProxy) modifyPlatonRequest(req *http.Request) {
 
 func modifyPlatonResponse() func(*http.Response) error {
 	return func(resp *http.Response) error {
-		if resp.Request != nil && resp.Request.Header.Get(platonHeaderRpcMethod) == MethodEthGetBlockByNumber {
-			gzipReader, err := gzip.NewReader(resp.Body)
+		if resp.Request != nil && resp.Request.Header.Get(ontologyHeaderRpcMethod) == MethodEthGetBlockByNumber {
+			originData, err := ioutil.ReadAll(resp.Body)
 			if err != nil {
 				return err
 			}
-			originData, err := ioutil.ReadAll(gzipReader)
-			if err != nil {
-				return err
-			}
-			var msg jsonrpcMessage
-			if err = json.Unmarshal(originData, &msg); err != nil {
-				return err
-			}
-			var result Header
-			if err = json.Unmarshal(msg.Result, &result); err != nil {
-				return err
-			}
-			if result.UncleHash == nil {
-				result.UncleHash = &types.EmptyUncleHash
-			}
-			if result.Difficulty == nil {
-				result.Difficulty = &hexutil.Big{}
-			}
-			if result.GasLimit == nil {
-				result.GasLimit = new(hexutil.Uint64)
-			}
-			msg.Result, err = json.Marshal(result)
-			if err != nil {
-				return err
-			}
-			newData, err := json.Marshal(msg)
-			if err != nil {
-				return err
-			}
-			/*var b bytes.Buffer
-			gz := gzip.NewWriter(&b)
-			if _, err = gz.Write(newData); err != nil {
-				return err
-			}
-			if err = gz.Close(); err != nil {
-				return err
-			}
-			resp.Body = ioutil.NopCloser(bytes.NewReader(b.Bytes()))
-			resp.ContentLength = int64(len(b.Bytes()))*/
-			resp.Body = ioutil.NopCloser(bytes.NewReader(newData))
-			resp.ContentLength = int64(len(newData))
+			newData := originData
+			resp.Body = ioutil.NopCloser(bytes.NewReader([]byte(newData)))
+			resp.ContentLength = int64(len([]byte(newData)))
 			resp.Header.Set("Content-Length", strconv.Itoa(len(newData)))
 		}
 		return nil
