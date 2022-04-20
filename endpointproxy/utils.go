@@ -35,6 +35,8 @@ const (
 	ontologyChainId = 58
 
 	crabChainId = 44
+
+	platonChainId = 210425
 )
 
 // this struct is copied from eth client, so we need to pay attention to the update of eth client
@@ -57,6 +59,9 @@ type jsonError struct {
 func StartProxy(originEndpoint string, chainId uint64, port int) error {
 	var err error
 	switch chainId {
+	case platonChainId:
+		h := new(PlatonProxy)
+		err = h.startPlatonProxy(originEndpoint, port)
 	case crabChainId:
 		h := new(CrabProxy)
 		err = h.startCrabProxy(originEndpoint, port)
