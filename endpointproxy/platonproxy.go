@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"strconv"
 	"strings"
 
 	"github.com/celer-network/goutils/log"
@@ -98,7 +99,7 @@ func modifyPlatonResponse() func(*http.Response) error {
 			if err != nil {
 				return err
 			}
-			var b bytes.Buffer
+			/*var b bytes.Buffer
 			gz := gzip.NewWriter(&b)
 			if _, err = gz.Write(newData); err != nil {
 				return err
@@ -107,7 +108,10 @@ func modifyPlatonResponse() func(*http.Response) error {
 				return err
 			}
 			resp.Body = ioutil.NopCloser(bytes.NewReader(b.Bytes()))
-			resp.ContentLength = int64(len(b.Bytes()))
+			resp.ContentLength = int64(len(b.Bytes()))*/
+			resp.Body = ioutil.NopCloser(bytes.NewReader(newData))
+			resp.ContentLength = int64(len(newData))
+			resp.Header.Set("Content-Length", strconv.Itoa(len(newData)))
 		}
 		return nil
 	}
