@@ -3,6 +3,8 @@ package endpointproxy
 import (
 	"bytes"
 	"encoding/json"
+	"github.com/ethereum/go-ethereum/common/hexutil"
+	"github.com/ethereum/go-ethereum/core/types"
 	"io/ioutil"
 	"net/http"
 	"net/http/httputil"
@@ -67,7 +69,31 @@ func modifyPlatonResponse() func(*http.Response) error {
 			if err != nil {
 				return err
 			}
-			newData := originData
+			var msg jsonrpcMessage
+			if err = json.Unmarshal(originData, &msg); err != nil {
+				return err
+			}
+			var result Header
+			if err = json.Unmarshal(msg.Result, &result); err != nil {
+				return err
+			}
+			if result.UncleHash == nil {
+				result.UncleHash = &types.EmptyUncleHash
+			}
+			if result.Difficulty == nil {
+				result.Difficulty = &hexutil.Big{}
+			}
+			if result.GasLimit == nil {
+				result.GasLimit = new(hexutil.Uint64)
+			}
+			msg.Result, err = json.Marshal(result)
+			if err != nil {
+				return err
+			}
+			newData, err := json.Marshal(msg)
+			if err != nil {
+				return err
+			}
 			resp.Body = ioutil.NopCloser(bytes.NewReader([]byte(newData)))
 			resp.ContentLength = int64(len([]byte(newData)))
 			resp.Header.Set("Content-Length", strconv.Itoa(len(newData)))
