@@ -39,6 +39,9 @@ func (h *PlatonProxy) modifyPlatonRequest(req *http.Request) {
 	req.URL.Scheme = h.platonTargetUrl.Scheme
 	req.URL.Host = h.platonTargetUrl.Host
 	req.Host = h.platonTargetUrl.Host
+	if req.Body == nil {
+		return
+	}
 	reqStr, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		log.Errorf("invalid platon request err:%s", err.Error())
