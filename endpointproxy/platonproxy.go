@@ -2,14 +2,13 @@ package endpointproxy
 
 import (
 	"bytes"
+	"compress/gzip"
 	"encoding/json"
-	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/core/types"
 	"io/ioutil"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
-	"strconv"
 	"strings"
 
 	"github.com/celer-network/goutils/log"
@@ -65,7 +64,11 @@ func (c *PlatonProxy) modifyPlatonRequest(req *http.Request) {
 func modifyPlatonResponse() func(*http.Response) error {
 	return func(resp *http.Response) error {
 		if resp.Request != nil && resp.Request.Header.Get(ontologyHeaderRpcMethod) == MethodEthGetBlockByNumber {
-			originData, err := ioutil.ReadAll(resp.Body)
+			gzipReader, err := gzip.NewReader(resp.Body)
+			if err != nil {
+				return err
+			}
+			originData, err := ioutil.ReadAll(gzipReader)
 			if err != nil {
 				return err
 			}
@@ -80,12 +83,6 @@ func modifyPlatonResponse() func(*http.Response) error {
 			if result.UncleHash == nil {
 				result.UncleHash = &types.EmptyUncleHash
 			}
-			if result.Difficulty == nil {
-				result.Difficulty = &hexutil.Big{}
-			}
-			if result.GasLimit == nil {
-				result.GasLimit = new(hexutil.Uint64)
-			}
 			msg.Result, err = json.Marshal(result)
 			if err != nil {
 				return err
@@ -94,9 +91,16 @@ func modifyPlatonResponse() func(*http.Response) error {
 			if err != nil {
 				return err
 			}
-			resp.Body = ioutil.NopCloser(bytes.NewReader([]byte(newData)))
-			resp.ContentLength = int64(len([]byte(newData)))
-			resp.Header.Set("Content-Length", strconv.Itoa(len(newData)))
+			var b bytes.Buffer
+			gz := gzip.NewWriter(&b)
+			if _, err = gz.Write(newData); err != nil {
+				return err
+			}
+			if err = gz.Close(); err != nil {
+				return err
+			}
+			resp.Body = ioutil.NopCloser(bytes.NewReader(b.Bytes()))
+			resp.ContentLength = int64(len(b.Bytes()))
 		}
 		return nil
 	}
