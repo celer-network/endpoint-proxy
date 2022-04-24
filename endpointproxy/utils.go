@@ -40,6 +40,8 @@ const (
 
 	sxChainId        = 416
 	sxTestnetChainId = 647
+
+	neonTestnetChainId = 245022926
 )
 
 // this struct is copied from eth client, so we need to pay attention to the update of eth client
@@ -62,6 +64,9 @@ type jsonError struct {
 func StartProxy(originEndpoint string, chainId uint64, port int) error {
 	var err error
 	switch chainId {
+	case neonTestnetChainId:
+		h := new(NeonProxy)
+		err = h.startNeonProxy(originEndpoint, port)
 	case sxChainId, sxTestnetChainId:
 		h := new(SxProxy)
 		err = h.startSxProxy(originEndpoint, port)
