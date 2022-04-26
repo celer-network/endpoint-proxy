@@ -7,14 +7,9 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
-	"strconv"
 	"strings"
 
 	"github.com/celer-network/goutils/log"
-)
-
-const (
-	nervosHeaderRpcMethod = "header-rpc-method"
 )
 
 type NervosProxy struct {
@@ -22,55 +17,47 @@ type NervosProxy struct {
 }
 
 // NewProxy takes target host and creates a reverse proxy
-func (c *NervosProxy) startNervosProxy(targetHost string, port int) error {
+func (h *NervosProxy) startNervosProxy(targetHost string, port int) error {
 	var err error
-	c.nervosTargetUrl, err = url.Parse(targetHost)
+	h.nervosTargetUrl, err = url.Parse(targetHost)
 	if err != nil {
 		return err
 	}
-	p := httputil.NewSingleHostReverseProxy(c.nervosTargetUrl)
+	p := httputil.NewSingleHostReverseProxy(h.nervosTargetUrl)
 	originalDirector := p.Director
 	p.Director = func(req *http.Request) {
 		originalDirector(req)
-		c.modifyNervosRequest(req)
+		h.modifyNervosRequest(req)
 	}
-	p.ModifyResponse = modifyNervosResponse()
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", proxyRequestHandler(p))
 	go startCustomProxyByPort(port, mux)
 	return nil
 }
 
-func (c *NervosProxy) modifyNervosRequest(req *http.Request) {
-	req.URL.Scheme = c.nervosTargetUrl.Scheme
-	req.URL.Host = c.nervosTargetUrl.Host
-	req.Host = c.nervosTargetUrl.Host
+func (h *NervosProxy) modifyNervosRequest(req *http.Request) {
+	req.URL.Scheme = h.nervosTargetUrl.Scheme
+	req.URL.Host = h.nervosTargetUrl.Host
+	req.Host = h.nervosTargetUrl.Host
 	reqStr, err := ioutil.ReadAll(req.Body)
 	if err != nil {
-		log.Warnf("invalid nervos request err:%s", err.Error())
+		log.Errorf("invalid nervos request err:%s", err.Error())
 		return
 	}
-	var msg jsonrpcMessage
-	if err = json.Unmarshal(reqStr, &msg); err != nil {
-		log.Warnf("fail to unmarshal this nervos req body err:%s", err.Error())
+	msg := &jsonrpcMessage{}
+	if err = json.Unmarshal(reqStr, msg); err != nil {
+		log.Errorf("fail to unmarshal this nervos req body err:%s", err.Error())
 		return
 	}
-	req.Header.Set(nervosHeaderRpcMethod, msg.Method)
-	req.Body = ioutil.NopCloser(bytes.NewReader(reqStr))
-}
-
-func modifyNervosResponse() func(*http.Response) error {
-	return func(resp *http.Response) error {
-		if resp.Request != nil && resp.Request.Header.Get(nervosHeaderRpcMethod) == MethodEthCall {
-			originData, err := ioutil.ReadAll(resp.Body)
-			if err != nil {
-				return err
-			}
-			newData := strings.Replace(string(originData), ",\"from\":\"0x0000000000000000000000000000000000000000\"", "", 1)
-			resp.Body = ioutil.NopCloser(bytes.NewReader([]byte(newData)))
-			resp.ContentLength = int64(len([]byte(newData)))
-			resp.Header.Set("Content-Length", strconv.Itoa(len(newData)))
-		}
-		return nil
+	if msg.Method == MethodEthCall {
+		newParams := strings.Replace(string(msg.Params), ",\"from\":\"0x0000000000000000000000000000000000000000\"", "", 1)
+		msg.Params = []byte(newParams)
 	}
+	newMsg, marshalErr := json.Marshal(msg)
+	if marshalErr != nil {
+		log.Errorf("fail to marshal this new nervos req, raw:%s, err:%s", string(newMsg), marshalErr.Error())
+		return
+	}
+	req.Body = ioutil.NopCloser(bytes.NewReader(newMsg))
+	req.ContentLength = int64(len(newMsg))
 }
