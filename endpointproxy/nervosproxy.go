@@ -61,7 +61,7 @@ func (c *NervosProxy) modifyNervosRequest(req *http.Request) {
 
 func modifyNervosResponse() func(*http.Response) error {
 	return func(resp *http.Response) error {
-		if resp.Request != nil && resp.Request.Header.Get(nervosHeaderRpcMethod) == MethodEthGetBlockByNumber {
+		if resp.Request != nil && resp.Request.Header.Get(nervosHeaderRpcMethod) == MethodEthCall {
 			originData, err := ioutil.ReadAll(resp.Body)
 			if err != nil {
 				return err
