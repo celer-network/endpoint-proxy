@@ -66,7 +66,7 @@ func modifyNervosResponse() func(*http.Response) error {
 			if err != nil {
 				return err
 			}
-			newData := strings.Replace(string(originData), "\"stateRoot\":\"0x\"", "\"stateRoot\":\"0x0000000000000000000000000000000000000000000000000000000000000000\"", 1)
+			newData := strings.Replace(string(originData), ",\"from\":\"0x0000000000000000000000000000000000000000\"", "", 1)
 			resp.Body = ioutil.NopCloser(bytes.NewReader([]byte(newData)))
 			resp.ContentLength = int64(len([]byte(newData)))
 			resp.Header.Set("Content-Length", strconv.Itoa(len(newData)))
