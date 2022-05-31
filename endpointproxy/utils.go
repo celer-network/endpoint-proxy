@@ -58,8 +58,24 @@ type jsonError struct {
 	Data    interface{} `json:"data,omitempty"`
 }
 
+var chainIdPortMap = make(map[uint64]int)
+
+func alreadyStarted(chainId uint64, port int) bool {
+	curPort, ok := chainIdPortMap[chainId]
+	if ok && curPort == port {
+		return true
+	} else {
+		return false
+	}
+}
+
 // it will use chainId to determined which proxy to launch
 func StartProxy(originEndpoint string, chainId uint64, port int) error {
+	if alreadyStarted(chainId, port) {
+		smallDelay()
+		log.Infof("proxy for chain:%d, endpoint:%s, port:%d already started", chainId, originEndpoint, port)
+		return nil
+	}
 	var err error
 	switch chainId {
 	case sxChainId, sxTestnetChainId:
@@ -101,6 +117,7 @@ func StartProxy(originEndpoint string, chainId uint64, port int) error {
 	}
 	smallDelay()
 	log.Infof("start proxy for chain:%d, endpoint:%s, port:%d", chainId, originEndpoint, port)
+	chainIdPortMap[chainId] = port
 	return nil
 }
 
@@ -109,7 +126,6 @@ func startCustomProxyByPort(port int, handler http.Handler) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	return
 }
 
 // ProxyRequestHandler handles the http request using proxy
