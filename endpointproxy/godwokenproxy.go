@@ -48,10 +48,6 @@ func (h *GodwokenProxy) modifyGodwokenRequest(req *http.Request) {
 		log.Errorf("fail to unmarshal this godwoken req body err:%s", err.Error())
 		return
 	}
-	if msg.Method == MethodEthGetCode {
-		newParams := strings.Replace(string(msg.Params), "\"pending\"", "\"latest\"", 1)
-		msg.Params = []byte(newParams)
-	}
 	if msg.Method == MethodEthCall {
 		newParams := strings.Replace(string(msg.Params), ",\"from\":\"0x0000000000000000000000000000000000000000\"", "", 1)
 		msg.Params = []byte(newParams)
