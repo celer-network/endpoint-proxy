@@ -42,6 +42,7 @@ const (
 	sxTestnetChainId = 647
 
 	godwokenTestnetChainId = 71401
+	godwokenMainnetChainId = 71402
 )
 
 // this struct is copied from eth client, so we need to pay attention to the update of eth client
@@ -80,7 +81,7 @@ func StartProxy(originEndpoint string, chainId uint64, port int) error {
 	}
 	var err error
 	switch chainId {
-	case godwokenTestnetChainId:
+	case godwokenTestnetChainId, godwokenMainnetChainId:
 		h := new(GodwokenProxy)
 		err = h.startGodwokenProxy(originEndpoint, port)
 	case sxChainId, sxTestnetChainId:
