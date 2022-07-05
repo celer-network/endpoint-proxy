@@ -3,12 +3,13 @@ package endpointproxy
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/celer-network/goutils/log"
 	"io/ioutil"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
 	"strings"
+
+	"github.com/celer-network/goutils/log"
 )
 
 type GodwokenProxy struct {
@@ -16,7 +17,7 @@ type GodwokenProxy struct {
 }
 
 // NewProxy takes target host and creates a reverse proxy
-func (h *GodwokenProxy) startGodwokenProxy(targetHost string, port int) error {
+func (h *GodwokenProxy) startGodwokenProxy(targetHost string, port int, chainId uint64) error {
 	var err error
 	h.godwokenTargetUrl, err = url.Parse(targetHost)
 	if err != nil {
@@ -30,7 +31,7 @@ func (h *GodwokenProxy) startGodwokenProxy(targetHost string, port int) error {
 	}
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", proxyRequestHandler(p))
-	go startCustomProxyByPort(port, mux)
+	go startCustomProxyByPort(port, mux, chainId)
 	return nil
 }
 

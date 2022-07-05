@@ -1,6 +1,7 @@
 package endpointproxy
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -61,11 +62,24 @@ type jsonError struct {
 	Data    interface{} `json:"data,omitempty"`
 }
 
-var chainIdPortMap = make(map[uint64]int)
+type ServerWrap struct {
+	Svr  *http.Server
+	Port int
+}
+
+var chainIdSvrMap = make(map[uint64]ServerWrap)
 
 func alreadyStarted(chainId uint64, port int) bool {
-	curPort, ok := chainIdPortMap[chainId]
-	if ok && curPort == port {
+	svrWrap, ok := chainIdSvrMap[chainId]
+	if ok && svrWrap.Port == port {
+		// close old server
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer func() {
+			// extra handling here
+			cancel()
+		}()
+		svrWrap.Svr.Shutdown(ctx)
+		log.Infof("close endpoint proxy success, chainid %d, port: %d", chainId, svrWrap.Port)
 		return true
 	} else {
 		return false
@@ -76,44 +90,43 @@ func alreadyStarted(chainId uint64, port int) bool {
 func StartProxy(originEndpoint string, chainId uint64, port int) error {
 	if alreadyStarted(chainId, port) {
 		smallDelay()
-		log.Infof("proxy for chain:%d, endpoint:%s, port:%d already started", chainId, originEndpoint, port)
-		return nil
+		log.Infof("proxy for chain:%d, endpoint:%s, port:%d restart...", chainId, originEndpoint, port)
 	}
 	var err error
 	switch chainId {
 	case godwokenTestnetChainId, godwokenMainnetChainId:
 		h := new(GodwokenProxy)
-		err = h.startGodwokenProxy(originEndpoint, port)
+		err = h.startGodwokenProxy(originEndpoint, port, chainId)
 	case sxChainId, sxTestnetChainId:
 		h := new(SxProxy)
-		err = h.startSxProxy(originEndpoint, port)
+		err = h.startSxProxy(originEndpoint, port, chainId)
 	case platonChainId:
 		h := new(PlatonProxy)
-		err = h.startPlatonProxy(originEndpoint, port)
+		err = h.startPlatonProxy(originEndpoint, port, chainId)
 	case crabChainId:
 		h := new(CrabProxy)
-		err = h.startCrabProxy(originEndpoint, port)
+		err = h.startCrabProxy(originEndpoint, port, chainId)
 	case ontologyChainId:
 		h := new(OntologyProxy)
-		err = h.startOntologyProxy(originEndpoint, port)
+		err = h.startOntologyProxy(originEndpoint, port, chainId)
 	case confluxChainId:
 		h := new(ConfluxProxy)
-		err = h.startConfluxProxy(originEndpoint, port)
+		err = h.startConfluxProxy(originEndpoint, port, chainId)
 	case astarChainId, shidenChainId:
 		h := new(AstarProxy)
-		err = h.startAstarProxy(originEndpoint, port)
+		err = h.startAstarProxy(originEndpoint, port, chainId)
 	case acalaTestnetChainId, acalaChainId:
 		h := new(AcalaProxy)
-		err = h.startAcalaProxy(originEndpoint, port)
+		err = h.startAcalaProxy(originEndpoint, port, chainId)
 	case cloverChainId, cloverTestnetChainId:
 		h := new(CloverProxy)
-		err = h.startCloverProxy(originEndpoint, port)
+		err = h.startCloverProxy(originEndpoint, port, chainId)
 	case harmonyChainId, harmonyTestnetChainId:
 		h := new(HarmonyProxy)
-		err = h.startHarmonyProxy(originEndpoint, port)
+		err = h.startHarmonyProxy(originEndpoint, port, chainId)
 	case celoChainId, celoTestnetChainId:
 		c := new(CeloProxy)
-		err = c.startCeloProxy(originEndpoint, port)
+		err = c.startCeloProxy(originEndpoint, port, chainId)
 	default:
 		return fmt.Errorf("do not support proxy for this chain, origin endpoint:%s, chainId:%d", originEndpoint, chainId)
 	}
@@ -123,14 +136,23 @@ func StartProxy(originEndpoint string, chainId uint64, port int) error {
 	}
 	smallDelay()
 	log.Infof("start proxy for chain:%d, endpoint:%s, port:%d", chainId, originEndpoint, port)
-	chainIdPortMap[chainId] = port
 	return nil
 }
 
-func startCustomProxyByPort(port int, handler http.Handler) {
-	err := http.ListenAndServe(fmt.Sprintf(":%d", port), handler)
+func startCustomProxyByPort(port int, handler http.Handler, chainId uint64) {
+	server := &http.Server{Addr: fmt.Sprintf(":%d", port), Handler: handler}
+	chainIdSvrMap[chainId] = ServerWrap{
+		Svr:  server,
+		Port: port,
+	}
+	err := server.ListenAndServe()
+	//err := http.ListenAndServe(fmt.Sprintf(":%d", port), handler)
 	if err != nil {
-		log.Fatal(err)
+		if err == http.ErrServerClosed {
+			log.Warnf("endpoint proxy close, port %d", port)
+		} else {
+			log.Fatal(err)
+		}
 	}
 }
 

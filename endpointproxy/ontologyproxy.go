@@ -22,7 +22,7 @@ type OntologyProxy struct {
 }
 
 // NewProxy takes target host and creates a reverse proxy
-func (c *OntologyProxy) startOntologyProxy(targetHost string, port int) error {
+func (c *OntologyProxy) startOntologyProxy(targetHost string, port int, chainId uint64) error {
 	var err error
 	c.ontologyTargetUrl, err = url.Parse(targetHost)
 	if err != nil {
@@ -37,7 +37,7 @@ func (c *OntologyProxy) startOntologyProxy(targetHost string, port int) error {
 	p.ModifyResponse = modifyOntologyResponse()
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", proxyRequestHandler(p))
-	go startCustomProxyByPort(port, mux)
+	go startCustomProxyByPort(port, mux, chainId)
 	return nil
 }
 
