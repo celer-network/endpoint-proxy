@@ -17,7 +17,7 @@ type CrabProxy struct {
 }
 
 // NewProxy takes target host and creates a reverse proxy
-func (h *CrabProxy) startCrabProxy(targetHost string, port int) error {
+func (h *CrabProxy) startCrabProxy(targetHost string, port int, chainId uint64) error {
 	var err error
 	h.crabTargetUrl, err = url.Parse(targetHost)
 	if err != nil {
@@ -31,7 +31,7 @@ func (h *CrabProxy) startCrabProxy(targetHost string, port int) error {
 	}
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", proxyRequestHandler(p))
-	go startCustomProxyByPort(port, mux)
+	go startCustomProxyByPort(port, mux, chainId)
 	return nil
 }
 
