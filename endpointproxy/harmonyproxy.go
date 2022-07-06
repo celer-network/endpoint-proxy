@@ -31,7 +31,7 @@ func (h *HarmonyProxy) startHarmonyProxy(targetHost string, port int, chainId ui
 	}
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", proxyRequestHandler(p))
-	go startCustomProxyByPort(port, mux, chainId)
+	go startCustomProxyByPort(port, mux, chainId, targetHost)
 	return nil
 }
 

@@ -31,7 +31,7 @@ func (h *CloverProxy) startCloverProxy(targetHost string, port int, chainId uint
 	}
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", proxyRequestHandler(p))
-	go startCustomProxyByPort(port, mux, chainId)
+	go startCustomProxyByPort(port, mux, chainId, targetHost)
 	return nil
 }
 
