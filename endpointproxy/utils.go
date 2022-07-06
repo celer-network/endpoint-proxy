@@ -63,34 +63,43 @@ type jsonError struct {
 }
 
 type ServerWrap struct {
-	Svr  *http.Server
-	Port int
+	Svr      *http.Server
+	Port     int
+	Endpoint string
 }
 
 var chainIdSvrMap = make(map[uint64]ServerWrap)
 
-func alreadyStarted(chainId uint64, port int) bool {
+func checkProxyStatus(chainId uint64, port int, originEndpoint string) bool {
 	svrWrap, ok := chainIdSvrMap[chainId]
 	if ok && svrWrap.Port == port {
-		// close old server
-		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-		defer func() {
-			// extra handling here
-			cancel()
-		}()
-		svrWrap.Svr.Shutdown(ctx)
-		log.Infof("close endpoint proxy success, chainid %d, port: %d", chainId, svrWrap.Port)
-		return true
+		if svrWrap.Endpoint != originEndpoint {
+			// close old server
+			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+			defer func() {
+				// extra handling here
+				cancel()
+			}()
+			svrWrap.Svr.Shutdown(ctx)
+			log.Infof("close endpoint proxy success, chainid %d, port: %d, rpc: %s", chainId, svrWrap.Port, originEndpoint)
+			return true
+		} else {
+			log.Infof("remain current proxy server, chainid %d, port: %d, rpc: %s", chainId, svrWrap.Port, originEndpoint)
+			return false
+		}
 	} else {
-		return false
+		return true
 	}
 }
 
 // it will use chainId to determined which proxy to launch
 func StartProxy(originEndpoint string, chainId uint64, port int) error {
-	if alreadyStarted(chainId, port) {
+	if checkProxyStatus(chainId, port, originEndpoint) {
 		smallDelay()
-		log.Infof("proxy for chain:%d, endpoint:%s, port:%d restart...", chainId, originEndpoint, port)
+		log.Infof("proxy for chain:%d, endpoint:%s, port:%d start...", chainId, originEndpoint, port)
+	} else {
+		log.Infof("proxy for chain:%d, endpoint:%s, port:%d already start...", chainId, originEndpoint, port)
+		return nil
 	}
 	var err error
 	switch chainId {
@@ -139,11 +148,12 @@ func StartProxy(originEndpoint string, chainId uint64, port int) error {
 	return nil
 }
 
-func startCustomProxyByPort(port int, handler http.Handler, chainId uint64) {
+func startCustomProxyByPort(port int, handler http.Handler, chainId uint64, endpoint string) {
 	server := &http.Server{Addr: fmt.Sprintf(":%d", port), Handler: handler}
 	chainIdSvrMap[chainId] = ServerWrap{
-		Svr:  server,
-		Port: port,
+		Svr:      server,
+		Port:     port,
+		Endpoint: endpoint,
 	}
 	err := server.ListenAndServe()
 	//err := http.ListenAndServe(fmt.Sprintf(":%d", port), handler)

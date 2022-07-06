@@ -37,7 +37,7 @@ func (c *OntologyProxy) startOntologyProxy(targetHost string, port int, chainId 
 	p.ModifyResponse = modifyOntologyResponse()
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", proxyRequestHandler(p))
-	go startCustomProxyByPort(port, mux, chainId)
+	go startCustomProxyByPort(port, mux, chainId, targetHost)
 	return nil
 }
 

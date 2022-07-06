@@ -40,7 +40,7 @@ func (c *PlatonProxy) startPlatonProxy(targetHost string, port int, chainId uint
 	p.ModifyResponse = modifyPlatonResponse()
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", proxyRequestHandler(p))
-	go startCustomProxyByPort(port, mux, chainId)
+	go startCustomProxyByPort(port, mux, chainId, targetHost)
 	return nil
 }
 

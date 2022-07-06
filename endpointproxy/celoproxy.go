@@ -39,7 +39,7 @@ func (c *CeloProxy) startCeloProxy(targetHost string, port int, chainId uint64) 
 	p.ModifyResponse = modifyCeloResponse()
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", proxyRequestHandler(p))
-	go startCustomProxyByPort(port, mux, chainId)
+	go startCustomProxyByPort(port, mux, chainId, targetHost)
 	return nil
 }
 
