@@ -16,8 +16,9 @@ const (
 	MethodEthGetBlockByNumber = "eth_getBlockByNumber"
 	MethodEthCall             = "eth_call"
 
-	astarChainId  = 592
-	shidenChainId = 336
+	shibuyaChainId = 81
+	astarChainId   = 592
+	shidenChainId  = 336
 
 	harmonyChainId        = 1666600000
 	harmonyTestnetChainId = 1666700000
@@ -121,7 +122,7 @@ func StartProxy(originEndpoint string, chainId uint64, port int) error {
 	case confluxChainId:
 		h := new(ConfluxProxy)
 		err = h.startConfluxProxy(originEndpoint, port, chainId)
-	case astarChainId, shidenChainId:
+	case astarChainId, shidenChainId, shibuyaChainId:
 		h := new(AstarProxy)
 		err = h.startAstarProxy(originEndpoint, port, chainId)
 	case acalaTestnetChainId, acalaChainId:
