@@ -10,7 +10,6 @@ import (
 	"net/url"
 
 	"github.com/celer-network/goutils/log"
-	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/core/types"
 )
 
@@ -82,9 +81,11 @@ func modifyZkSyncResponse() func(*http.Response) error {
 			if result.Bloom == nil {
 				result.Bloom = &types.Bloom{}
 			}
-			if result.Difficulty == nil {
+			/*if result.Difficulty == nil {
 				result.Difficulty = &hexutil.Big{}
-			}
+			}*/
+			result.BaseFee = nil
+
 			msg.Result, err = json.Marshal(result)
 			if err != nil {
 				return err
