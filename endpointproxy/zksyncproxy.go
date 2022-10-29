@@ -81,9 +81,8 @@ func modifyZkSyncResponse() func(*http.Response) error {
 			if result.Bloom == nil {
 				result.Bloom = &types.Bloom{}
 			}
-			/*if result.Difficulty == nil {
-				result.Difficulty = &hexutil.Big{}
-			}*/
+
+			// TODO, need use auto gas price?
 			result.BaseFee = nil
 
 			msg.Result, err = json.Marshal(result)
