@@ -47,6 +47,7 @@ const (
 	godwokenMainnetChainId = 71402
 
 	zkSyncTestnetChainId = 280
+	zkSyncMainnetChainId = 324
 )
 
 // this struct is copied from eth client, so we need to pay attention to the update of eth client
@@ -106,7 +107,7 @@ func StartProxy(originEndpoint string, chainId uint64, port int) error {
 	}
 	var err error
 	switch chainId {
-	case zkSyncTestnetChainId:
+	case zkSyncTestnetChainId, zkSyncMainnetChainId:
 		h := new(ZkSyncProxy)
 		err = h.startZkSyncProxy(originEndpoint, port, chainId)
 	case godwokenTestnetChainId, godwokenMainnetChainId:
