@@ -3,7 +3,7 @@ package endpointproxy
 import (
 	"bytes"
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -12,22 +12,22 @@ import (
 	"github.com/celer-network/goutils/log"
 )
 
-type AcalaProxy struct {
-	acalaTargetUrl *url.URL
+type AstarProxy struct {
+	astarTargetUrl *url.URL
 }
 
 // NewProxy takes target host and creates a reverse proxy
-func (h *AcalaProxy) startAcalaProxy(targetHost string, port int, chainId uint64) error {
+func (h *AstarProxy) startAstarProxy(targetHost string, port int, chainId uint64) error {
 	var err error
-	h.acalaTargetUrl, err = url.Parse(targetHost)
+	h.astarTargetUrl, err = url.Parse(targetHost)
 	if err != nil {
 		return err
 	}
-	p := httputil.NewSingleHostReverseProxy(h.acalaTargetUrl)
+	p := httputil.NewSingleHostReverseProxy(h.astarTargetUrl)
 	originalDirector := p.Director
 	p.Director = func(req *http.Request) {
 		originalDirector(req)
-		h.modifyAcalaRequest(req)
+		h.modifyAstarRequest(req)
 	}
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", proxyRequestHandler(p))
@@ -35,18 +35,18 @@ func (h *AcalaProxy) startAcalaProxy(targetHost string, port int, chainId uint64
 	return nil
 }
 
-func (h *AcalaProxy) modifyAcalaRequest(req *http.Request) {
-	req.URL.Scheme = h.acalaTargetUrl.Scheme
-	req.URL.Host = h.acalaTargetUrl.Host
-	req.Host = h.acalaTargetUrl.Host
-	reqStr, err := ioutil.ReadAll(req.Body)
+func (h *AstarProxy) modifyAstarRequest(req *http.Request) {
+	req.URL.Scheme = h.astarTargetUrl.Scheme
+	req.URL.Host = h.astarTargetUrl.Host
+	req.Host = h.astarTargetUrl.Host
+	reqStr, err := io.ReadAll(req.Body)
 	if err != nil {
-		log.Errorf("invalid acala request err:%s", err.Error())
+		log.Errorf("invalid astar request err:%s", err.Error())
 		return
 	}
 	msg := &jsonrpcMessage{}
 	if err = json.Unmarshal(reqStr, msg); err != nil {
-		log.Errorf("fail to unmarshal this acala req body err:%s", err.Error())
+		log.Errorf("fail to unmarshal this astar req body err:%s", err.Error())
 		return
 	}
 	if msg.Method == MethodEthGetCode {
@@ -55,9 +55,9 @@ func (h *AcalaProxy) modifyAcalaRequest(req *http.Request) {
 	}
 	newMsg, marshalErr := json.Marshal(msg)
 	if marshalErr != nil {
-		log.Errorf("fail to marshal this new acala req, raw:%s, err:%s", string(newMsg), marshalErr.Error())
+		log.Errorf("fail to marshal this new astar req, raw:%s, err:%s", string(newMsg), marshalErr.Error())
 		return
 	}
-	req.Body = ioutil.NopCloser(bytes.NewReader(newMsg))
+	req.Body = io.NopCloser(bytes.NewReader(newMsg))
 	req.ContentLength = int64(len(newMsg))
 }

@@ -48,6 +48,12 @@ const (
 
 	zkSyncTestnetChainId = 280
 	zkSyncMainnetChainId = 324
+
+	// Need eth_call input -> data patch
+	apeChainId         = 16350
+	fncyChainId        = 73
+	reiChainId         = 47805
+	milkomedaC1ChainId = 2001
 )
 
 // this struct is copied from eth client, so we need to pay attention to the update of eth client
@@ -143,6 +149,9 @@ func StartProxy(originEndpoint string, chainId uint64, port int) error {
 	case celoChainId, celoTestnetChainId:
 		c := new(CeloProxy)
 		err = c.startCeloProxy(originEndpoint, port, chainId)
+	case apeChainId, fncyChainId, reiChainId, milkomedaC1ChainId:
+		c := new(EthCallProxy)
+		err = c.startEthCallProxy(originEndpoint, port, chainId)
 	default:
 		return fmt.Errorf("do not support proxy for this chain, origin endpoint:%s, chainId:%d", originEndpoint, chainId)
 	}

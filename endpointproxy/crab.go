@@ -3,7 +3,7 @@ package endpointproxy
 import (
 	"bytes"
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -39,7 +39,7 @@ func (h *CrabProxy) modifyCrabRequest(req *http.Request) {
 	req.URL.Scheme = h.crabTargetUrl.Scheme
 	req.URL.Host = h.crabTargetUrl.Host
 	req.Host = h.crabTargetUrl.Host
-	reqStr, err := ioutil.ReadAll(req.Body)
+	reqStr, err := io.ReadAll(req.Body)
 	if err != nil {
 		log.Errorf("invalid crab request err:%s", err.Error())
 		return
@@ -58,6 +58,6 @@ func (h *CrabProxy) modifyCrabRequest(req *http.Request) {
 		log.Errorf("fail to marshal this new crab req, raw:%s, err:%s", string(newMsg), marshalErr.Error())
 		return
 	}
-	req.Body = ioutil.NopCloser(bytes.NewReader(newMsg))
+	req.Body = io.NopCloser(bytes.NewReader(newMsg))
 	req.ContentLength = int64(len(newMsg))
 }

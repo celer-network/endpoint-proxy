@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"compress/gzip"
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -47,7 +47,7 @@ func (c *CeloProxy) modifyCeloRequest(req *http.Request) {
 	req.URL.Scheme = c.celoTargetUrl.Scheme
 	req.URL.Host = c.celoTargetUrl.Host
 	req.Host = c.celoTargetUrl.Host
-	reqStr, err := ioutil.ReadAll(req.Body)
+	reqStr, err := io.ReadAll(req.Body)
 	if err != nil {
 		log.Warnf("invalid celo request err:%s", err.Error())
 		return
@@ -58,7 +58,7 @@ func (c *CeloProxy) modifyCeloRequest(req *http.Request) {
 		return
 	}
 	req.Header.Set(celoHeaderRpcMethod, msg.Method)
-	req.Body = ioutil.NopCloser(bytes.NewReader(reqStr))
+	req.Body = io.NopCloser(bytes.NewReader(reqStr))
 }
 
 func modifyCeloResponse() func(*http.Response) error {
@@ -68,7 +68,7 @@ func modifyCeloResponse() func(*http.Response) error {
 			if err != nil {
 				return err
 			}
-			originData, err := ioutil.ReadAll(gzipReader)
+			originData, err := io.ReadAll(gzipReader)
 			if err != nil {
 				return err
 			}
@@ -105,7 +105,7 @@ func modifyCeloResponse() func(*http.Response) error {
 			if err = gz.Close(); err != nil {
 				return err
 			}
-			resp.Body = ioutil.NopCloser(bytes.NewReader(b.Bytes()))
+			resp.Body = io.NopCloser(bytes.NewReader(b.Bytes()))
 			resp.ContentLength = int64(len(b.Bytes()))
 		}
 		return nil

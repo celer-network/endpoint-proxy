@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"compress/gzip"
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -49,7 +49,7 @@ func (c *PlatonProxy) modifyPlatonRequest(req *http.Request) {
 	req.URL.Host = c.platonTargetUrl.Host
 	req.Host = c.platonTargetUrl.Host
 	req.URL.Path = strings.TrimRight(req.URL.Path, "/")
-	reqStr, err := ioutil.ReadAll(req.Body)
+	reqStr, err := io.ReadAll(req.Body)
 	if err != nil {
 		log.Warnf("invalid platon request err:%s", err.Error())
 		return
@@ -59,8 +59,12 @@ func (c *PlatonProxy) modifyPlatonRequest(req *http.Request) {
 		log.Warnf("fail to unmarshal this platon req body err:%s", err.Error())
 		return
 	}
+	if msg.Method == MethodEthCall {
+		newParams := strings.Replace(string(msg.Params), ",\"input\":", "\"data\":", 1)
+		msg.Params = []byte(newParams)
+	}
 	req.Header.Set(platonHeaderRpcMethod, msg.Method)
-	req.Body = ioutil.NopCloser(bytes.NewReader(reqStr))
+	req.Body = io.NopCloser(bytes.NewReader(reqStr))
 }
 
 func modifyPlatonResponse() func(*http.Response) error {
@@ -70,7 +74,7 @@ func modifyPlatonResponse() func(*http.Response) error {
 			if err != nil {
 				return err
 			}
-			originData, err := ioutil.ReadAll(gzipReader)
+			originData, err := io.ReadAll(gzipReader)
 			if err != nil {
 				return err
 			}
@@ -107,7 +111,7 @@ func modifyPlatonResponse() func(*http.Response) error {
 			if err = gz.Close(); err != nil {
 				return err
 			}
-			resp.Body = ioutil.NopCloser(bytes.NewReader(b.Bytes()))
+			resp.Body = io.NopCloser(bytes.NewReader(b.Bytes()))
 			resp.ContentLength = int64(len(b.Bytes()))
 			resp.Header.Set("Content-Length", strconv.Itoa(len(b.Bytes())))
 		}

@@ -3,7 +3,7 @@ package endpointproxy
 import (
 	"bytes"
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -39,7 +39,7 @@ func (h *HarmonyProxy) modifyHarmonyRequest(req *http.Request) {
 	req.URL.Scheme = h.harmonyTargetUrl.Scheme
 	req.URL.Host = h.harmonyTargetUrl.Host
 	req.Host = h.harmonyTargetUrl.Host
-	reqStr, err := ioutil.ReadAll(req.Body)
+	reqStr, err := io.ReadAll(req.Body)
 	if err != nil {
 		log.Errorf("invalid harmony request err:%s", err.Error())
 		return
@@ -53,11 +53,15 @@ func (h *HarmonyProxy) modifyHarmonyRequest(req *http.Request) {
 		newParams := strings.Replace(string(msg.Params), "\"pending\"", "\"latest\"", 1)
 		msg.Params = []byte(newParams)
 	}
+	if msg.Method == MethodEthCall {
+		newParams := strings.Replace(string(msg.Params), ",\"input\":", "\"data\":", 1)
+		msg.Params = []byte(newParams)
+	}
 	newMsg, marshalErr := json.Marshal(msg)
 	if marshalErr != nil {
 		log.Errorf("fail to marshal this new harmony req, raw:%s, err:%s", string(newMsg), marshalErr.Error())
 		return
 	}
-	req.Body = ioutil.NopCloser(bytes.NewReader(newMsg))
+	req.Body = io.NopCloser(bytes.NewReader(newMsg))
 	req.ContentLength = int64(len(newMsg))
 }

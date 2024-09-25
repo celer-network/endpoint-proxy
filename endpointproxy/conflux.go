@@ -3,7 +3,7 @@ package endpointproxy
 import (
 	"bytes"
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -39,7 +39,7 @@ func (h *ConfluxProxy) modifyConfluxRequest(req *http.Request) {
 	req.URL.Scheme = h.confluxTargetUrl.Scheme
 	req.URL.Host = h.confluxTargetUrl.Host
 	req.Host = h.confluxTargetUrl.Host
-	reqStr, err := ioutil.ReadAll(req.Body)
+	reqStr, err := io.ReadAll(req.Body)
 	if err != nil {
 		log.Errorf("invalid conflux request err:%s", err.Error())
 		return
@@ -55,6 +55,7 @@ func (h *ConfluxProxy) modifyConfluxRequest(req *http.Request) {
 	}
 	if msg.Method == MethodEthCall {
 		newParams := strings.Replace(string(msg.Params), ",\"from\":\"0x0000000000000000000000000000000000000000\"", "", 1)
+		newParams = strings.Replace(newParams, ",\"input\":", "\"data\":", 1)
 		msg.Params = []byte(newParams)
 	}
 	newMsg, marshalErr := json.Marshal(msg)
@@ -62,6 +63,6 @@ func (h *ConfluxProxy) modifyConfluxRequest(req *http.Request) {
 		log.Errorf("fail to marshal this new conflux req, raw:%s, err:%s", string(newMsg), marshalErr.Error())
 		return
 	}
-	req.Body = ioutil.NopCloser(bytes.NewReader(newMsg))
+	req.Body = io.NopCloser(bytes.NewReader(newMsg))
 	req.ContentLength = int64(len(newMsg))
 }

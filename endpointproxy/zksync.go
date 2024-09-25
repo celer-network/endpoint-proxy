@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"compress/gzip"
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -45,7 +45,7 @@ func (c *ZkSyncProxy) modifyZkSyncRequest(req *http.Request) {
 	req.URL.Scheme = c.zkSyncTargetUrl.Scheme
 	req.URL.Host = c.zkSyncTargetUrl.Host
 	req.Host = c.zkSyncTargetUrl.Host
-	reqStr, err := ioutil.ReadAll(req.Body)
+	reqStr, err := io.ReadAll(req.Body)
 	if err != nil {
 		log.Warnf("invalid zkSync request err:%s", err.Error())
 		return
@@ -56,7 +56,7 @@ func (c *ZkSyncProxy) modifyZkSyncRequest(req *http.Request) {
 		return
 	}
 	req.Header.Set(zkSyncHeaderRpcMethod, msg.Method)
-	req.Body = ioutil.NopCloser(bytes.NewReader(reqStr))
+	req.Body = io.NopCloser(bytes.NewReader(reqStr))
 }
 
 func modifyZkSyncResponse() func(*http.Response) error {
@@ -66,7 +66,7 @@ func modifyZkSyncResponse() func(*http.Response) error {
 			if err != nil {
 				return err
 			}
-			originData, err := ioutil.ReadAll(gzipReader)
+			originData, err := io.ReadAll(gzipReader)
 			if err != nil {
 				return err
 			}
@@ -98,7 +98,7 @@ func modifyZkSyncResponse() func(*http.Response) error {
 			if err = gz.Close(); err != nil {
 				return err
 			}
-			resp.Body = ioutil.NopCloser(bytes.NewReader(b.Bytes()))
+			resp.Body = io.NopCloser(bytes.NewReader(b.Bytes()))
 			resp.ContentLength = int64(len(b.Bytes()))
 		}
 		return nil
