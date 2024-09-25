@@ -15,10 +15,6 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 )
 
-const (
-	celoHeaderRpcMethod = "header-rpc-method"
-)
-
 type CeloProxy struct {
 	celoTargetUrl *url.URL
 }
@@ -57,13 +53,13 @@ func (c *CeloProxy) modifyCeloRequest(req *http.Request) {
 		log.Warnf("fail to unmarshal this celo req body err:%s", err.Error())
 		return
 	}
-	req.Header.Set(celoHeaderRpcMethod, msg.Method)
+	req.Header.Set(HeaderRpcMethod, msg.Method)
 	req.Body = io.NopCloser(bytes.NewReader(reqStr))
 }
 
 func modifyCeloResponse() func(*http.Response) error {
 	return func(resp *http.Response) error {
-		if resp.Request != nil && resp.Request.Header.Get(celoHeaderRpcMethod) == MethodEthGetBlockByNumber {
+		if resp.Request != nil && resp.Request.Header.Get(HeaderRpcMethod) == MethodEthGetBlockByNumber {
 			gzipReader, err := gzip.NewReader(resp.Body)
 			if err != nil {
 				return err

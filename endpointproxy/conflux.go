@@ -49,15 +49,20 @@ func (h *ConfluxProxy) modifyConfluxRequest(req *http.Request) {
 		log.Errorf("fail to unmarshal this conflux req body err:%s", err.Error())
 		return
 	}
-	if msg.Method == MethodEthGetCode {
+
+	switch msg.Method {
+	case MethodEthGetCode:
 		newParams := strings.Replace(string(msg.Params), "\"pending\"", "\"latest\"", 1)
 		msg.Params = []byte(newParams)
-	}
-	if msg.Method == MethodEthCall {
+	case MethodEthCall:
 		newParams := strings.Replace(string(msg.Params), ",\"from\":\"0x0000000000000000000000000000000000000000\"", "", 1)
-		newParams = strings.Replace(newParams, ",\"input\":", "\"data\":", 1)
+		newParams = strings.Replace(newParams, "\"input\":", "\"data\":", 1)
+		msg.Params = []byte(newParams)
+	case MethodEthEstimateGas:
+		newParams := strings.Replace(string(msg.Params), "\"input\":", "\"data\":", 1)
 		msg.Params = []byte(newParams)
 	}
+
 	newMsg, marshalErr := json.Marshal(msg)
 	if marshalErr != nil {
 		log.Errorf("fail to marshal this new conflux req, raw:%s, err:%s", string(newMsg), marshalErr.Error())

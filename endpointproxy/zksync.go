@@ -13,10 +13,6 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 )
 
-const (
-	zkSyncHeaderRpcMethod = "header-rpc-method"
-)
-
 type ZkSyncProxy struct {
 	zkSyncTargetUrl *url.URL
 }
@@ -55,13 +51,13 @@ func (c *ZkSyncProxy) modifyZkSyncRequest(req *http.Request) {
 		log.Warnf("fail to unmarshal this zkSync req body err:%s", err.Error())
 		return
 	}
-	req.Header.Set(zkSyncHeaderRpcMethod, msg.Method)
+	req.Header.Set(HeaderRpcMethod, msg.Method)
 	req.Body = io.NopCloser(bytes.NewReader(reqStr))
 }
 
 func modifyZkSyncResponse() func(*http.Response) error {
 	return func(resp *http.Response) error {
-		if resp.Request != nil && resp.Request.Header.Get(zkSyncHeaderRpcMethod) == MethodEthGetBlockByNumber {
+		if resp.Request != nil && resp.Request.Header.Get(HeaderRpcMethod) == MethodEthGetBlockByNumber {
 			gzipReader, err := gzip.NewReader(resp.Body)
 			if err != nil {
 				return err

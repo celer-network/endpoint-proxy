@@ -16,10 +16,6 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 )
 
-const (
-	platonHeaderRpcMethod = "header-rpc-method"
-)
-
 type PlatonProxy struct {
 	platonTargetUrl *url.URL
 }
@@ -59,17 +55,21 @@ func (c *PlatonProxy) modifyPlatonRequest(req *http.Request) {
 		log.Warnf("fail to unmarshal this platon req body err:%s", err.Error())
 		return
 	}
-	if msg.Method == MethodEthCall {
-		newParams := strings.Replace(string(msg.Params), ",\"input\":", "\"data\":", 1)
+
+	switch msg.Method {
+	case MethodEthCall:
+	case MethodEthEstimateGas:
+		newParams := strings.Replace(string(msg.Params), "\"input\":", "\"data\":", 1)
 		msg.Params = []byte(newParams)
 	}
-	req.Header.Set(platonHeaderRpcMethod, msg.Method)
+
+	req.Header.Set(HeaderRpcMethod, msg.Method)
 	req.Body = io.NopCloser(bytes.NewReader(reqStr))
 }
 
 func modifyPlatonResponse() func(*http.Response) error {
 	return func(resp *http.Response) error {
-		if resp.Request != nil && resp.Request.Header.Get(platonHeaderRpcMethod) == MethodEthGetBlockByNumber {
+		if resp.Request != nil && resp.Request.Header.Get(HeaderRpcMethod) == MethodEthGetBlockByNumber {
 			gzipReader, err := gzip.NewReader(resp.Body)
 			if err != nil {
 				return err

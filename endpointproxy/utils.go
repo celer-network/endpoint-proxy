@@ -15,6 +15,9 @@ const (
 	MethodEthGetCode          = "eth_getCode"
 	MethodEthGetBlockByNumber = "eth_getBlockByNumber"
 	MethodEthCall             = "eth_call"
+	MethodEthEstimateGas      = "eth_estimateGas"
+
+	HeaderRpcMethod = "header-rpc-method"
 
 	shibuyaChainId = 81
 	astarChainId   = 592

@@ -49,11 +49,17 @@ func (h *GodwokenProxy) modifyGodwokenRequest(req *http.Request) {
 		log.Errorf("fail to unmarshal this godwoken req body err:%s", err.Error())
 		return
 	}
-	if msg.Method == MethodEthCall {
+
+	switch msg.Method {
+	case MethodEthCall:
 		newParams := strings.Replace(string(msg.Params), ",\"from\":\"0x0000000000000000000000000000000000000000\"", "", 1)
-		newParams = strings.Replace(newParams, ",\"input\":", "\"data\":", 1)
+		newParams = strings.Replace(newParams, "\"input\":", "\"data\":", 1)
+		msg.Params = []byte(newParams)
+	case MethodEthEstimateGas:
+		newParams := strings.Replace(string(msg.Params), "\"input\":", "\"data\":", 1)
 		msg.Params = []byte(newParams)
 	}
+
 	newMsg, marshalErr := json.Marshal(msg)
 	if marshalErr != nil {
 		log.Errorf("fail to marshal this new godwoken req, raw:%s, err:%s", string(newMsg), marshalErr.Error())

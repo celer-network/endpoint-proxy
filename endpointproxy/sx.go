@@ -49,10 +49,12 @@ func (h *SxProxy) modifySxRequest(req *http.Request) {
 		log.Errorf("fail to unmarshal this sx req body err:%s", err.Error())
 		return
 	}
+
 	if msg.Method == MethodEthGetCode {
 		newParams := strings.Replace(string(msg.Params), "\"pending\"", "\"latest\"", 1)
 		msg.Params = []byte(newParams)
 	}
+
 	newMsg, marshalErr := json.Marshal(msg)
 	if marshalErr != nil {
 		log.Errorf("fail to marshal this new sx req, raw:%s, err:%s", string(newMsg), marshalErr.Error())

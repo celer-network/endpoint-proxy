@@ -13,10 +13,6 @@ import (
 	"github.com/celer-network/goutils/log"
 )
 
-const (
-	ontologyHeaderRpcMethod = "header-rpc-method"
-)
-
 type OntologyProxy struct {
 	ontologyTargetUrl *url.URL
 }
@@ -55,17 +51,21 @@ func (c *OntologyProxy) modifyOntologyRequest(req *http.Request) {
 		log.Warnf("fail to unmarshal this ontology req body err:%s", err.Error())
 		return
 	}
-	if msg.Method == MethodEthCall {
-		newParams := strings.Replace(string(msg.Params), ",\"input\":", "\"data\":", 1)
+
+	switch msg.Method {
+	case MethodEthCall:
+	case MethodEthEstimateGas:
+		newParams := strings.Replace(string(msg.Params), "\"input\":", "\"data\":", 1)
 		msg.Params = []byte(newParams)
 	}
-	req.Header.Set(ontologyHeaderRpcMethod, msg.Method)
+
+	req.Header.Set(HeaderRpcMethod, msg.Method)
 	req.Body = io.NopCloser(bytes.NewReader(reqStr))
 }
 
 func modifyOntologyResponse() func(*http.Response) error {
 	return func(resp *http.Response) error {
-		if resp.Request != nil && resp.Request.Header.Get(ontologyHeaderRpcMethod) == MethodEthGetBlockByNumber {
+		if resp.Request != nil && resp.Request.Header.Get(HeaderRpcMethod) == MethodEthGetBlockByNumber {
 			originData, err := io.ReadAll(resp.Body)
 			if err != nil {
 				return err
