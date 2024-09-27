@@ -54,8 +54,7 @@ func (h *HarmonyProxy) modifyHarmonyRequest(req *http.Request) {
 	case MethodEthGetCode:
 		newParams := strings.Replace(string(msg.Params), "\"pending\"", "\"latest\"", 1)
 		msg.Params = []byte(newParams)
-	case MethodEthCall:
-	case MethodEthEstimateGas:
+	case MethodEthCall, MethodEthEstimateGas:
 		newParams := strings.Replace(string(msg.Params), "\"input\":", "\"data\":", 1)
 		msg.Params = []byte(newParams)
 	}

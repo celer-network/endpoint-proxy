@@ -53,8 +53,7 @@ func (c *OntologyProxy) modifyOntologyRequest(req *http.Request) {
 	}
 
 	switch msg.Method {
-	case MethodEthCall:
-	case MethodEthEstimateGas:
+	case MethodEthCall, MethodEthEstimateGas:
 		newParams := strings.Replace(string(msg.Params), "\"input\":", "\"data\":", 1)
 		msg.Params = []byte(newParams)
 	}
