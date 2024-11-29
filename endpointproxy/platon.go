@@ -63,7 +63,12 @@ func (c *PlatonProxy) modifyPlatonRequest(req *http.Request) {
 	}
 
 	req.Header.Set(HeaderRpcMethod, msg.Method)
-	req.Body = io.NopCloser(bytes.NewReader(reqStr))
+	newMsg, marshalErr := json.Marshal(msg)
+	if marshalErr != nil {
+		log.Errorf("fail to marshal new platon req, raw:%s, err:%s", string(newMsg), marshalErr.Error())
+		return
+	}
+	req.Body = io.NopCloser(bytes.NewReader(newMsg))
 }
 
 func modifyPlatonResponse() func(*http.Response) error {
