@@ -69,6 +69,7 @@ func (c *PlatonProxy) modifyPlatonRequest(req *http.Request) {
 		return
 	}
 	req.Body = io.NopCloser(bytes.NewReader(newMsg))
+	req.ContentLength = int64(len(newMsg))
 }
 
 func modifyPlatonResponse() func(*http.Response) error {

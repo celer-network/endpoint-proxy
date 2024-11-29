@@ -65,6 +65,7 @@ func (c *OntologyProxy) modifyOntologyRequest(req *http.Request) {
 		return
 	}
 	req.Body = io.NopCloser(bytes.NewReader(newMsg))
+	req.ContentLength = int64(len(newMsg))
 }
 
 func modifyOntologyResponse() func(*http.Response) error {
